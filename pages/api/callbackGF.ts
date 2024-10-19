@@ -9,7 +9,7 @@ export default async function handler(
 
   const clientId = "6636e187c9d64d1fb17c606d30f527ad";
   const clientSecret = "1776b201728840219764e789eac1fd92";
-  const redirectUri = "http://localhost:3000/api/callbackGF";
+  const redirectUri = "https://whatismybflisteningto.vercel.app/api/callbackGF";
 
   try {
     const response = await axios.post(
