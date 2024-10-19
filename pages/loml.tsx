@@ -25,36 +25,35 @@ const Girlfriend: NextPage = () => {
     const fetchSongForGirlfriend = async () => {
       const userID = "gf";
       const response = await fetch(`/api/fetchSong/?userID=${userID}`);
-      const data = await response.json();
-      if (data.songID) {
-        const params = new URLSearchParams(window.location.search);
-        const accessToken = params.get("access_token");
-        setToken(accessToken ? accessToken : null)
-        const songDetailsResponse = await fetch(
-          `https://api.spotify.com/v1/tracks/${data.songID}`,
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }
-        );
-        if (songDetailsResponse.ok) {
-          const data = await songDetailsResponse.json();
-          const song: Song = {
-            title: data.name,
-              artist: data.artists
-                .map((artist: any) => artist.name)
-                .join(", "),
-              maxLength: new Date(data.duration_ms)
-                .toISOString()
-                .substr(14, 5),
-              timestamp: data.progress_ms ? new Date(data.progress_ms).toISOString().substr(14, 5) : '',
-              albumImage:
-                data.album.images[0]?.url || "/default-cover.png",
+      if (response.ok) {
+        const data = await response.json();
+        if (data.songID) {
+          const params = new URLSearchParams(window.location.search);
+          const accessToken = params.get("access_token");
+          setToken(accessToken ? accessToken : null);
+          const songDetailsResponse = await fetch(
+            `https://api.spotify.com/v1/tracks/${data.songID}`,
+            {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+              },
+            }
+          );
+          if (songDetailsResponse.ok) {
+            const data = await songDetailsResponse.json();
+            const song: Song = {
+              title: data.name,
+              artist: data.artists.map((artist: any) => artist.name).join(", "),
+              maxLength: new Date(data.duration_ms).toISOString().substr(14, 5),
+              timestamp: data.progress_ms
+                ? new Date(data.progress_ms).toISOString().substr(14, 5)
+                : "",
+              albumImage: data.album.images[0]?.url || "/default-cover.png",
               href: data?.external_urls.spotify,
               id: data.id,
-          };
-          setSong(song);
+            };
+            setSong(song);
+          }
         }
       }
     };
@@ -115,14 +114,18 @@ const Girlfriend: NextPage = () => {
   }, [progress, timestamp, song?.maxLength, token]);
 
   if (!song) {
-    return <>
-    <nav className={styles.nav}>
-        {!token && (
-          <button onClick={() => router.push("/api/loginGF")}>{"Login"}</button>
-        )}
-      </nav>
-    <div>Loading song...</div>
-    </>;
+    return (
+      <>
+        <nav className={styles.nav}>
+          {!token && (
+            <button onClick={() => router.push("/api/loginGF")}>
+              {"Login"}
+            </button>
+          )}
+        </nav>
+        <div>Loading song...</div>
+      </>
+    );
   }
 
   return (
