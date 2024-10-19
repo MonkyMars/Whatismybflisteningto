@@ -4,7 +4,6 @@ import Head from "next/head";
 import Image from "next/image";
 import styles from "../styles/Home.module.scss";
 import { useRouter } from "next/router";
-import { time } from "console";
 
 interface Song {
   title: string;
@@ -29,7 +28,7 @@ const Home: NextPage = () => {
     timestamp: "",
     albumImage: "/default.bmp",
     href: "",
-    id: null,
+    id: "",
   });
 
   useEffect(() => {
@@ -54,9 +53,10 @@ const Home: NextPage = () => {
           } else if (response.status === 401) {
             setToken("");
           }
-          const data = await response.json();
-          if (data && accessToken) {
-            setToken(accessToken);
+          if(response.ok){
+            const data = await response.json();
+            if (data && accessToken) {
+              setToken(accessToken);
           }
           if (data?.item) {
             const newSong: Song = {
@@ -75,6 +75,7 @@ const Home: NextPage = () => {
             };
             setSong(newSong);
             setTimestamp(newSong.timestamp);
+          }
           } else {
             setToken("");
           }
@@ -114,67 +115,32 @@ const Home: NextPage = () => {
         );
       };
       const intervalId = setInterval(updateTimestamp, 1000);
-
       return () => clearInterval(intervalId);
     }
   }, [timestamp, song.maxLength, token]);
 
+  // Store the song every 15 seconds
   useEffect(() => {
-    const intervalId = setInterval(() => setNext(true), 100 * 10 * 15);
+    const intervalId = setInterval(() => {
+      if (song.id) {
+        updateGirlfriend();
+      }
+    }, 15000); // 15 seconds
+
     return () => clearInterval(intervalId);
-  }, []);
+  }, [song]);
 
-  React.useEffect(() => {
-    if (token) {
-      const calculateProgress = () => {
-        const [minutes, seconds] = timestamp.split(":");
-        const totalProgress = parseInt(minutes) * 60 + parseInt(seconds);
-        const [minutesD, secondsD] = song.maxLength.split(":");
-        const minutesDuration = parseInt(minutesD);
-        const secondsDuration = parseInt(secondsD);
-        const totalMaxLength = minutesDuration * 60 + secondsDuration;
-        let songProgress = (totalProgress / totalMaxLength) * 100;
-        songProgress = (songProgress / 60) * 100;
-        setProgress(Math.round(songProgress / 2.75));
-        calculateProgress();
-      };
-    }
-  }, [progress, timestamp, song.maxLength, token]);
-
-
-  React.useEffect(() => {
-    const updateGirlfriend = async() => {
-      const userID = 'gf';
-      const songID = song?.id;
-      const result = await fetch('/api/storeSong', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({songID: songID, userID: userID})
-      });
-      const data = await result.json();
-      console.log(data)
-    }
-    const fetchSong = async() => {
-      const userID = 'gf';
-      const result = await fetch(`/api/fetchSong/?userID=${userID}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-      })
-      const data = await result.json();
-      const songID = data.songID;
-
-    }
-    if(song) {
-      updateGirlfriend();
-      fetchSong();
-    }
-  }, [song])
-
-
+  const updateGirlfriend = async () => {
+    const userID = 'gf';
+    const songID = song.id;
+    await fetch('/api/storeSong', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ songID, userID }),
+    });
+  };
 
   return (
     <>
