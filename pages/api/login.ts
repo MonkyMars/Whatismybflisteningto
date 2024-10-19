@@ -11,5 +11,3 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   res.redirect(spotifyAuthUrl);
 }
-
-//  https://accounts.spotify.com/authorize?response_type=code&client_id=undefined&scope=user-read-playback-state%20user-read-currently-playing&redirect_uri=undefined
