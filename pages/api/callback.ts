@@ -7,9 +7,9 @@ export default async function handler(
 ) {
   const code = req.query.code as string;
 
-  const clientId = process.env.NEXT_PUBLIC_CLIENT_ID;
-  const clientSecret = process.env.CLIENT_SECRET;
-  const redirectUri = process.env.NEXT_PUBLIC_REDIRECT_URI;
+  const clientId = '6636e187c9d64d1fb17c606d30f527ad';
+  const clientSecret = '1776b201728840219764e789eac1fd92';
+  const redirectUri = 'https://whatismybflisteningto.vercel.app/api/callback';
 
   try {
     const response = await axios.post(
