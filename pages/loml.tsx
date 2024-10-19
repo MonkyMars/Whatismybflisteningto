@@ -1,11 +1,8 @@
-import type { NextPage } from "next";
-import React, { useEffect } from "react";
-import Head from "next/head";
+import { NextPage } from "next";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import styles from "../styles/Home.module.scss";
 import { useRouter } from "next/router";
-import { time } from "console";
-
 interface Song {
   title: string;
   artist: string;
@@ -16,78 +13,54 @@ interface Song {
   id: string;
 }
 
-const Home: NextPage = () => {
+const Girlfriend: NextPage = () => {
   const [timestamp, setTimestamp] = React.useState("0:00");
+  const [song, setSong] = useState<Song | null>(null);
+  const router = useRouter();
+  const [token, setToken] = useState("");
   const [progress, setProgress] = React.useState(60);
   const [next, setNext] = React.useState(true);
-  const router = useRouter();
-  const [token, setToken] = React.useState<string>("");
-  const [song, setSong] = React.useState<Song>({
-    title: "",
-    artist: "",
-    maxLength: "",
-    timestamp: "",
-    albumImage: "/default.bmp",
-    href: "",
-    id: null,
-  });
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const accessToken = params.get("access_token");
-
-    const fetchSong = async () => {
-      if (!accessToken) return;
-      if (next) {
-        try {
-          const response = await fetch(
-            "https://api.spotify.com/v1/me/player/currently-playing",
-            {
-              headers: {
-                Authorization: `Bearer ${accessToken}`,
-              },
-            }
-          );
-          if (response.status === 204) {
-            console.log("No song currently playing");
-            return;
-          } else if (response.status === 401) {
-            setToken("");
+    const fetchSongForGirlfriend = async () => {
+      const userID = "gf";
+      const response = await fetch(`/api/fetchSong/?userID=${userID}`);
+      const data = await response.json();
+      if (data.songID) {
+        const params = new URLSearchParams(window.location.search);
+        const accessToken = params.get("access_token");
+        setToken(accessToken ? accessToken : null)
+        const songDetailsResponse = await fetch(
+          `https://api.spotify.com/v1/tracks/${data.songID}`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
           }
-          const data = await response.json();
-          if (data && accessToken) {
-            setToken(accessToken);
-          }
-          if (data?.item) {
-            const newSong: Song = {
-              title: data.item.name,
-              artist: data.item.artists
+        );
+        if (songDetailsResponse.ok) {
+          const data = await songDetailsResponse.json();
+          const song: Song = {
+            title: data.name,
+              artist: data.artists
                 .map((artist: any) => artist.name)
                 .join(", "),
-              maxLength: new Date(data.item.duration_ms)
+              maxLength: new Date(data.duration_ms)
                 .toISOString()
                 .substr(14, 5),
-              timestamp: new Date(data.progress_ms).toISOString().substr(14, 5),
+              timestamp: data.progress_ms ? new Date(data.progress_ms).toISOString().substr(14, 5) : '',
               albumImage:
-                data.item.album.images[0]?.url || "/default-cover.png",
-              href: data.item?.external_urls.spotify,
-              id: data.item.id,
-            };
-            setSong(newSong);
-            setTimestamp(newSong.timestamp);
-          } else {
-            setToken("");
-          }
-        } catch (error) {
-          console.error("Error fetching song:", error);
-        } finally {
-          setNext(false);
+                data.album.images[0]?.url || "/default-cover.png",
+              href: data?.external_urls.spotify,
+              id: data.id,
+          };
+          setSong(song);
         }
       }
     };
 
-    fetchSong();
-  }, [token, next]);
+    fetchSongForGirlfriend();
+  }, []);
 
   useEffect(() => {
     if (token) {
@@ -117,7 +90,7 @@ const Home: NextPage = () => {
 
       return () => clearInterval(intervalId);
     }
-  }, [timestamp, song.maxLength, token]);
+  }, [timestamp, song?.maxLength, token]);
 
   useEffect(() => {
     const intervalId = setInterval(() => setNext(true), 100 * 10 * 15);
@@ -139,51 +112,24 @@ const Home: NextPage = () => {
         calculateProgress();
       };
     }
-  }, [progress, timestamp, song.maxLength, token]);
+  }, [progress, timestamp, song?.maxLength, token]);
 
-
-  React.useEffect(() => {
-    const updateGirlfriend = async() => {
-      const userID = 'gf';
-      const songID = song?.id;
-      const result = await fetch('/api/storeSong', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({songID: songID, userID: userID})
-      });
-      const data = await result.json();
-      console.log(data)
-    }
-    const fetchSong = async() => {
-      const userID = 'gf';
-      const result = await fetch(`/api/fetchSong/?userID=${userID}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-      })
-      const data = await result.json();
-      const songID = data.songID;
-
-    }
-    if(song) {
-      updateGirlfriend();
-      fetchSong();
-    }
-  }, [song])
-
-
+  if (!song) {
+    return <>
+    <nav className={styles.nav}>
+        {!token && (
+          <button onClick={() => router.push("/api/loginGF")}>{"Login"}</button>
+        )}
+      </nav>
+    <div>Loading song...</div>
+    </>;
+  }
 
   return (
     <>
-      <Head>
-        <title>{"What is my bf listening to?"}</title>
-      </Head>
       <nav className={styles.nav}>
         {!token && (
-          <button onClick={() => router.push("/api/login")}>{"Login"}</button>
+          <button onClick={() => router.push("/api/loginGF")}>{"Login"}</button>
         )}
       </nav>
       <main className={styles.main}>
@@ -216,15 +162,10 @@ const Home: NextPage = () => {
               <label>{song.artist}</label>
             </div>
           </div>
-          <div className={styles.timestamps}>
-            <label>0{timestamp}</label>
-            <span style={{ width: progress + "%" }}></span>
-            <label>{song.maxLength}</label>
-          </div>
         </div>
       </main>
     </>
   );
 };
 
-export default Home;
+export default Girlfriend;

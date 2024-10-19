@@ -7,9 +7,9 @@ export default async function handler(
 ) {
   const code = req.query.code as string;
 
-  const clientId = '6636e187c9d64d1fb17c606d30f527ad';
-  const clientSecret = '1776b201728840219764e789eac1fd92';
-  const redirectUri = 'http://localhost:3000/api/callback';
+  const clientId = "6636e187c9d64d1fb17c606d30f527ad";
+  const clientSecret = "1776b201728840219764e789eac1fd92";
+  const redirectUri = "http://localhost:3000/api/callbackGF";
 
   try {
     const response = await axios.post(
@@ -31,11 +31,10 @@ export default async function handler(
     const { access_token, refresh_token, expires_in } = response.data;
 
     res.redirect(
-      `/?access_token=${access_token}&refresh_token=${refresh_token}&expires_in=${expires_in}`
+      `/loml/?access_token=${access_token}&refresh_token=${refresh_token}&expires_in=${expires_in}`
     );
   } catch (error) {
     console.error("Error getting Spotify tokens:", error);
     res.status(500).send("Authentication failed");
   }
 }
-
