@@ -10,4 +10,5 @@ body {
   background-color: #292929;
   color: #e3e3e3;
   font-family: "Poppins", verdana;
+  overflow: hidden;
 }
