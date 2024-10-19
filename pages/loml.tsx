@@ -24,7 +24,12 @@ const Girlfriend: NextPage = () => {
   useEffect(() => {
     const fetchSongForGirlfriend = async () => {
       const userID = "gf";
-      const response = await fetch(`/api/fetchSong/?userID=${userID}`);
+      const response = await fetch(`/api/fetchSong/?userID=${userID}`, {
+        method: "GET",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+      });
       if (response.ok) {
         const data = await response.json();
         if (data.songID) {
