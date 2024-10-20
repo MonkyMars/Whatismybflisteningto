@@ -18,7 +18,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       res.status(200).json({ message: 'Current song updated successfully' });
     } catch (error) {
       console.error("KV Store Error: ", error);
-      res.status(500).json({ message: 'Error updating song' });
+      res.status(500).json({ message: 'Error updating song', error: error });
     }
   } else {
     console.log("Method not allowed");
