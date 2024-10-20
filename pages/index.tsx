@@ -134,7 +134,7 @@ const Home: NextPage = () => {
     const userID = 'gf';
     const songID = song.id;
     await fetch('/api/storeSong', {
-      method: 'POST',
+      method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
       },
