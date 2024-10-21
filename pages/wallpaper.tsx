@@ -101,7 +101,8 @@ const Wallpaper: NextPage = () => {
       const data = await result.json();
       const matchingColor = getMatchingColor(data.dominantColor);
       const shadeOfGrey = getGrayShades(data.dominantColor)
-      setColor({songTitleColor: matchingColor, artistColor: shadeOfGrey})
+      setColor({songTitleColor: data.dominantColor, artistColor: matchingColor})
+      console.log(data)
     }
     fetchMainColor();
     fetchSong();
@@ -176,8 +177,8 @@ const Wallpaper: NextPage = () => {
             <Image
               alt="Album cover"
               src={song.albumImage}
-              width={10000}
-              height={10000}
+              width={2000}
+              height={2000}
               priority
               draggable={false}
             />

@@ -8,6 +8,8 @@
   align-items: center;
   justify-content: flex-end;
   box-sizing: border-box;
+  z-index: 1;
+  
   & button {
     background-color: #e3e3e3;
     padding: 0.7em 1.9em;
