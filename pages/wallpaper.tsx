@@ -160,6 +160,11 @@ const Wallpaper: NextPage = () => {
     calculateProgress();
   }, [timestamp, song])
 
+  React.useEffect(() => {
+    const interval = setInterval(() => setNext(!next), 1000 * 15);
+    return () => clearInterval(interval);
+  }, [next])
+  
 
   return (
     <>
