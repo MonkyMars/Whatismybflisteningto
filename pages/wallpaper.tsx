@@ -9,6 +9,7 @@ interface Song {
   maxLength: string;
   timestamp: string;
   albumImage: string;
+  albumName: string;
   href: string;
   id: string;
 }
@@ -26,6 +27,7 @@ const Wallpaper: NextPage = () => {
     maxLength: "",
     timestamp: "",
     albumImage: "/default.bmp",
+    albumName: '',
     href: "",
     id: "",
   });
@@ -62,6 +64,7 @@ const Wallpaper: NextPage = () => {
             console.log(data)
             if (data && accessToken) {
               setToken(true);
+              console.log('album name', data.item.album.name)
           }
           if (data?.item) {
             const newSong: Song = {
@@ -74,12 +77,14 @@ const Wallpaper: NextPage = () => {
                 .substr(14, 5),
               timestamp: new Date(data.progress_ms).toISOString().substr(14, 5),
               albumImage:
-                data.item.album.images[0]?.url || "/default-cover.png",
+                data.item.album.images[0]?.url || "default.bmp",
+              albumName: data.item.album.name,
               href: data.item?.external_urls.spotify,
               id: data.item.id,
             };
             setSong(newSong);
             setTimestamp(newSong.timestamp);
+            console.log(song)
           }
           } else {
             setToken(false);
@@ -196,7 +201,7 @@ const Wallpaper: NextPage = () => {
                 }
                 style={{color: color.songTitleColor}}
               >
-                {song.title}
+                {song.albumName === 'Clancy' ? 'klenki' : song.title}
               </h1>
 
               <label style={{color: color.artistColor || '#fff'}}>{song.artist}</label>
